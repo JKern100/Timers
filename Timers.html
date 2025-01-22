@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timers Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #e3f2fd;
+        }
+        .timer-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .timer {
+            text-align: center;
+            background: linear-gradient(135deg, #ffffff, #e3f2fd);
+            border: 2px solid #90caf9;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+        .timer:hover {
+            transform: scale(1.05);
+        }
+        .timer-title {
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #1565c0;
+        }
+        .timer-title[contenteditable] {
+            border: 1px dashed #ccc;
+            padding: 2px;
+            background-color: #e1f5fe;
+            border-radius: 4px;
+        }
+        .timer-display {
+            font-size: 26px;
+            margin-bottom: 10px;
+            color: #1e88e5;
+            font-weight: bold;
+        }
+        .timer-buttons button {
+            margin: 5px;
+            padding: 8px 14px;
+            font-size: 14px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #42a5f5;
+            color: white;
+            transition: background-color 0.2s ease;
+        }
+        .timer-buttons button:hover {
+            background-color: #1e88e5;
+        }
+        .summary-table {
+            margin-top: 20px;
+            margin-left: 10px;
+            border-collapse: collapse;
+            width: 90%;
+            background-color: #ffffff;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .summary-table th, .summary-table td {
+            border: 1px solid #90caf9;
+            padding: 10px;
+            text-align: left;
+        }
+        .summary-table th {
+            background-color: #bbdefb;
+            color: #0d47a1;
+            font-weight: bold;
+        }
+        .summary-table td {
+            color: #1565c0;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="color: #0d47a1; text-align: center;">Timers Dashboard</h1>
+    <div class="timer-container">
+        <div class="timer" id="emailing">
+            <div class="timer-title" contenteditable="true">Emailing</div>
+            <div class="timer-display" id="emailing-display">00:00:00</div>
+            <div class="timer-buttons">
+                <button onclick="startTimer('emailing')">Start</button>
+                <button onclick="pauseTimer('emailing')">Pause</button>
+                <button onclick="resetTimer('emailing')">Reset</button>
+            </div>
+        </div>
+        <div class="timer" id="scheduling">
+            <div class="timer-title" contenteditable="true">Scheduling</div>
+            <div class="timer-display" id="scheduling-display">00:00:00</div>
+            <div class="timer-buttons">
+                <button onclick="startTimer('scheduling')">Start</button>
+                <button onclick="pauseTimer('scheduling')">Pause</button>
+                <button onclick="resetTimer('scheduling')">Reset</button>
+            </div>
+        </div>
+        <div class="timer" id="meeting">
+            <div class="timer-title" contenteditable="true">Meeting</div>
+            <div class="timer-display" id="meeting-display">00:00:00</div>
+            <div class="timer-buttons">
+                <button onclick="startTimer('meeting')">Start</button>
+                <button onclick="pauseTimer('meeting')">Pause</button>
+                <button onclick="resetTimer('meeting')">Reset</button>
+            </div>
+        </div>
+        <div class="timer" id="reflecting">
+            <div class="timer-title" contenteditable="true">Reflecting</div>
+            <div class="timer-display" id="reflecting-display">00:00:00</div>
+            <div class="timer-buttons">
+                <button onclick="startTimer('reflecting')">Start</button>
+                <button onclick="pauseTimer('reflecting')">Pause</button>
+                <button onclick="resetTimer('reflecting')">Reset</button>
+            </div>
+        </div>
+        <div class="timer" id="other">
+            <div class="timer-title" contenteditable="true">Other</div>
+            <div class="timer-display" id="other-display">00:00:00</div>
+            <div class="timer-buttons">
+                <button onclick="startTimer('other')">Start</button>
+                <button onclick="pauseTimer('other')">Pause</button>
+                <button onclick="resetTimer('other')">Reset</button>
+            </div>
+        </div>
+        <div class="timer" id="other2">
+            <div class="timer-title" contenteditable="true">Other 2</div>
+            <div class="timer-display" id="other2-display">00:00:00</div>
+            <div class="timer-buttons">
+                <button onclick="startTimer('other2')">Start</button>
+                <button onclick="pauseTimer('other2')">Pause</button>
+                <button onclick="resetTimer('other2')">Reset</button>
+            </div>
+        </div>
+        <div class="timer" id="other3">
+            <div class="timer-title" contenteditable="true">Other 3</div>
+            <div class="timer-display" id="other3-display">00:00:00</div>
+            <div class="timer-buttons">
+                <button onclick="startTimer('other3')">Start</button>
+                <button onclick="pauseTimer('other3')">Pause</button>
+                <button onclick="resetTimer('other3')">Reset</button>
+            </div>
+        </div>
+        <div class="timer" id="other4">
+            <div class="timer-title" contenteditable="true">Other 4</div>
+            <div class="timer-display" id="other4-display">00:00:00</div>
+            <div class="timer-buttons">
+                <button onclick="startTimer('other4')">Start</button>
+                <button onclick="pauseTimer('other4')">Pause</button>
+                <button onclick="resetTimer('other4')">Reset</button>
+            </div>
+        </div>
+        <div class="timer" id="other5">
+            <div class="timer-title" contenteditable="true">Other 5</div>
+            <div class="timer-display" id="other5-display">00:00:00</div>
+            <div class="timer-buttons">
+                <button onclick="startTimer('other5')">Start</button>
+                <button onclick="pauseTimer('other5')">Pause</button>
+                <button onclick="resetTimer('other5')">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <table class="summary-table">
+        <thead>
+            <tr>
+                <th>Label</th>
+                <th>Total Time</th>
+                <th>Percentage</th>
+            </tr>
+        </thead>
+        <tbody id="summary-body">
+            <!-- Rows will be dynamically updated -->
+        </tbody>
+    </table>
+
+    <script>
+        const timers = {};
+        
+        function startTimer(timerId) {
+            pauseAllTimers(timerId);
+
+            if (!timers[timerId]) {
+                timers[timerId] = {
+                    seconds: 0,
+                    interval: null
+                };
+            }
+            if (!timers[timerId].interval) {
+                timers[timerId].interval = setInterval(() => {
+                    timers[timerId].seconds++;
+                    updateDisplay(timerId);
+                    updateSummary();
+                }, 1000);
+            }
+        }
+
+        function pauseTimer(timerId) {
+            if (timers[timerId] && timers[timerId].interval) {
+                clearInterval(timers[timerId].interval);
+                timers[timerId].interval = null;
+            }
+        }
+
+        function resetTimer(timerId) {
+            if (timers[timerId]) {
+                timers[timerId].seconds = 0;
+                updateDisplay(timerId);
+                updateSummary();
+            }
+        }
+
+        function pauseAllTimers(excludeId) {
+            Object.keys(timers).forEach(timerId => {
+                if (timerId !== excludeId) {
+                    pauseTimer(timerId);
+                }
+            });
+        }
+
+        function updateDisplay(timerId) {
+            const display = document.getElementById(`${timerId}-display`);
+            const seconds = timers[timerId].seconds;
+            const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
+            const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+            const secs = String(seconds % 60).padStart(2, '0');
+            display.textContent = `${hrs}:${mins}:${secs}`;
+        }
+
+        function updateSummary() {
+            const summaryBody = document.getElementById("summary-body");
+            summaryBody.innerHTML = "";
+            const totalSeconds = Object.values(timers).reduce((acc, timer) => acc + timer.seconds, 0);
+
+            Object.keys(timers).forEach(timerId => {
+                const timer = timers[timerId];
+                const label = document.getElementById(`${timerId}`).querySelector(".timer-title").textContent;
+                const time = `${String(Math.floor(timer.seconds / 3600)).padStart(2, '0')}:${String(Math.floor((timer.seconds % 3600) / 60)).padStart(2, '0')}:${String(timer.seconds % 60).padStart(2, '0')}`;
+                const percentage = totalSeconds > 0 ? ((timer.seconds / totalSeconds) * 100).toFixed(2) : "0.00";
+
+                const row = `<tr>
+                    <td>${label}</td>
+                    <td>${time}</td>
+                    <td>${percentage}%</td>
+                </tr>`;
+
+                summaryBody.innerHTML += row;
+            });
+        }
+    </script>
+</body>
+</html>
