@@ -83,10 +83,25 @@
         .summary-table td {
             color: #1565c0;
         }
+        .reset-all-button {
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #0d47a1;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .reset-all-button:hover {
+            background-color: #002171;
+        }
     </style>
 </head>
 <body>
     <h1 style="color: #0d47a1; text-align: center;">Time Management Dashboard</h1>
+    <button class="reset-all-button" onclick="resetAllTimers()">Reset All</button>
     <div class="timer-container">
         <div class="timer" id="emailing">
             <div class="timer-title" contenteditable="true">Emailing</div>
@@ -185,17 +200,20 @@
     </table>
 
     <script>
-        const timers = {};
-        
+        const timers = {
+            emailing: { seconds: 0, interval: null },
+            scheduling: { seconds: 0, interval: null },
+            meeting: { seconds: 0, interval: null },
+            reflecting: { seconds: 0, interval: null },
+            other: { seconds: 0, interval: null },
+            other2: { seconds: 0, interval: null },
+            other3: { seconds: 0, interval: null },
+            other4: { seconds: 0, interval: null },
+            other5: { seconds: 0, interval: null }
+        };
+
         function startTimer(timerId) {
             pauseAllTimers(timerId);
-
-            if (!timers[timerId]) {
-                timers[timerId] = {
-                    seconds: 0,
-                    interval: null
-                };
-            }
             if (!timers[timerId].interval) {
                 timers[timerId].interval = setInterval(() => {
                     timers[timerId].seconds++;
@@ -206,18 +224,23 @@
         }
 
         function pauseTimer(timerId) {
-            if (timers[timerId] && timers[timerId].interval) {
+            if (timers[timerId].interval) {
                 clearInterval(timers[timerId].interval);
                 timers[timerId].interval = null;
             }
         }
 
         function resetTimer(timerId) {
-            if (timers[timerId]) {
-                timers[timerId].seconds = 0;
-                updateDisplay(timerId);
-                updateSummary();
-            }
+            timers[timerId].seconds = 0;
+            updateDisplay(timerId);
+            updateSummary();
+        }
+
+        function resetAllTimers() {
+            Object.keys(timers).forEach(timerId => {
+                pauseTimer(timerId);
+                resetTimer(timerId);
+            });
         }
 
         function pauseAllTimers(excludeId) {
