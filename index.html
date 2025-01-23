@@ -200,23 +200,47 @@
     </table>
 
     <script>
-        const timers = {
-            emailing: { seconds: 0, interval: null },
-            scheduling: { seconds: 0, interval: null },
-            meeting: { seconds: 0, interval: null },
-            reflecting: { seconds: 0, interval: null },
-            other: { seconds: 0, interval: null },
-            other2: { seconds: 0, interval: null },
-            other3: { seconds: 0, interval: null },
-            other4: { seconds: 0, interval: null },
-            other5: { seconds: 0, interval: null }
+        const defaultTimers = {
+            emailing: { startTime: null, elapsed: 0 },
+            scheduling: { startTime: null, elapsed: 0 },
+            meeting: { startTime: null, elapsed: 0 },
+            reflecting: { startTime: null, elapsed: 0 },
+            other: { startTime: null, elapsed: 0 },
+            other2: { startTime: null, elapsed: 0 },
+            other3: { startTime: null, elapsed: 0 },
+            other4: { startTime: null, elapsed: 0 },
+            other5: { startTime: null, elapsed: 0 }
         };
+
+        const timers = JSON.parse(localStorage.getItem('timers')) || defaultTimers;
+
+        // Ensure all timers are initialized correctly
+        Object.keys(defaultTimers).forEach(timerId => {
+            if (!timers[timerId]) {
+                timers[timerId] = { ...defaultTimers[timerId] };
+            } else {
+                if (timers[timerId].startTime === undefined) timers[timerId].startTime = null;
+                if (timers[timerId].elapsed === undefined) timers[timerId].elapsed = 0;
+            }
+        });
+
+        const intervals = {};
+
+        function saveTimers() {
+            localStorage.setItem('timers', JSON.stringify(timers));
+        }
 
         function startTimer(timerId) {
             pauseAllTimers(timerId);
-            if (!timers[timerId].interval) {
-                timers[timerId].interval = setInterval(() => {
-                    timers[timerId].seconds++;
+            if (!timers[timerId].startTime) {
+                timers[timerId].startTime = Date.now() - timers[timerId].elapsed * 1000;
+                saveTimers();
+            }
+
+            if (!intervals[timerId]) {
+                intervals[timerId] = setInterval(() => {
+                    const now = Date.now();
+                    timers[timerId].elapsed = Math.floor((now - timers[timerId].startTime) / 1000);
                     updateDisplay(timerId);
                     updateSummary();
                 }, 1000);
@@ -224,27 +248,36 @@
         }
 
         function pauseTimer(timerId) {
-            if (timers[timerId].interval) {
-                clearInterval(timers[timerId].interval);
-                timers[timerId].interval = null;
+            if (intervals[timerId]) {
+                clearInterval(intervals[timerId]);
+                intervals[timerId] = null;
+            }
+            if (timers[timerId].startTime) {
+                const now = Date.now();
+                timers[timerId].elapsed = Math.floor((now - timers[timerId].startTime) / 1000);
+                timers[timerId].startTime = null;
+                saveTimers();
             }
         }
 
         function resetTimer(timerId) {
-            timers[timerId].seconds = 0;
+            timers[timerId].startTime = null;
+            timers[timerId].elapsed = 0;
+            clearInterval(intervals[timerId]);
+            intervals[timerId] = null;
             updateDisplay(timerId);
             updateSummary();
+            saveTimers();
         }
 
         function resetAllTimers() {
             Object.keys(timers).forEach(timerId => {
-                pauseTimer(timerId);
                 resetTimer(timerId);
             });
         }
 
         function pauseAllTimers(excludeId) {
-            Object.keys(timers).forEach(timerId => {
+            Object.keys(intervals).forEach(timerId => {
                 if (timerId !== excludeId) {
                     pauseTimer(timerId);
                 }
@@ -253,23 +286,23 @@
 
         function updateDisplay(timerId) {
             const display = document.getElementById(`${timerId}-display`);
-            const seconds = timers[timerId].seconds;
-            const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
-            const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
-            const secs = String(seconds % 60).padStart(2, '0');
+            const elapsed = timers[timerId].elapsed;
+            const hrs = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+            const mins = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+            const secs = String(elapsed % 60).padStart(2, '0');
             display.textContent = `${hrs}:${mins}:${secs}`;
         }
 
         function updateSummary() {
             const summaryBody = document.getElementById("summary-body");
             summaryBody.innerHTML = "";
-            const totalSeconds = Object.values(timers).reduce((acc, timer) => acc + timer.seconds, 0);
+            const totalSeconds = Object.values(timers).reduce((acc, timer) => acc + timer.elapsed, 0);
 
             Object.keys(timers).forEach(timerId => {
                 const timer = timers[timerId];
                 const label = document.getElementById(`${timerId}`).querySelector(".timer-title").textContent;
-                const time = `${String(Math.floor(timer.seconds / 3600)).padStart(2, '0')}:${String(Math.floor((timer.seconds % 3600) / 60)).padStart(2, '0')}:${String(timer.seconds % 60).padStart(2, '0')}`;
-                const percentage = totalSeconds > 0 ? ((timer.seconds / totalSeconds) * 100).toFixed(2) : "0.00";
+                const time = `${String(Math.floor(timer.elapsed / 3600)).padStart(2, '0')}:${String(Math.floor((timer.elapsed % 3600) / 60)).padStart(2, '0')}:${String(timer.elapsed % 60).padStart(2, '0')}`;
+                const percentage = totalSeconds > 0 ? ((timer.elapsed / totalSeconds) * 100).toFixed(2) : "0.00";
 
                 const row = `<tr>
                     <td>${label}</td>
@@ -280,6 +313,17 @@
                 summaryBody.innerHTML += row;
             });
         }
+
+        // Initialize displays and recalculate elapsed times
+        Object.keys(timers).forEach(timerId => {
+            if (timers[timerId].startTime) {
+                const now = Date.now();
+                timers[timerId].elapsed = Math.floor((now - timers[timerId].startTime) / 1000);
+            }
+            updateDisplay(timerId);
+        });
+
+        updateSummary();
     </script>
 </body>
 </html>
