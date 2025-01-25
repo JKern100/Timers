@@ -13,7 +13,6 @@
         }
         .timer-container {
             display: flex;
-            justify-content: space-around;
             flex-wrap: wrap;
             margin-bottom: 20px;
         }
@@ -64,9 +63,8 @@
         }
         .summary-table {
             margin-top: 20px;
-            margin-left: 10px;
             border-collapse: collapse;
-            width: 90%;
+            width: 100%;
             background-color: #ffffff;
             box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
         }
@@ -83,7 +81,7 @@
         .summary-table td {
             color: #1565c0;
         }
-        .reset-all-button {
+        .reset-all-button, .add-timer-button {
             margin-bottom: 20px;
             padding: 10px 20px;
             font-size: 16px;
@@ -94,94 +92,26 @@
             cursor: pointer;
             transition: background-color 0.2s ease;
         }
-        .reset-all-button:hover {
+        .reset-all-button:hover, .add-timer-button:hover {
             background-color: #002171;
         }
     </style>
 </head>
 <body>
     <h1 style="color: #0d47a1; text-align: center;">Time Management Dashboard</h1>
-    <button class="reset-all-button" onclick="resetAllTimers()">Reset All</button>
-    <div class="timer-container">
-        <div class="timer" id="emailing">
-            <div class="timer-title" contenteditable="true">Emailing</div>
-            <div class="timer-display" id="emailing-display">00:00:00</div>
+    <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px;">
+        <button class="add-timer-button" onclick="addTimer()">Add Another Timer</button>
+        <button class="reset-all-button" onclick="resetAllTimers()">Reset All</button>
+    </div>
+    <div class="timer-container" id="timer-container">
+        <!-- Start with one default timer -->
+        <div class="timer" id="timer-1">
+            <div class="timer-title" contenteditable="true">Timer 1</div>
+            <div class="timer-display" id="timer-1-display">00:00:00</div>
             <div class="timer-buttons">
-                <button onclick="startTimer('emailing')">Start</button>
-                <button onclick="pauseTimer('emailing')">Pause</button>
-                <button onclick="resetTimer('emailing')">Reset</button>
-            </div>
-        </div>
-        <div class="timer" id="scheduling">
-            <div class="timer-title" contenteditable="true">Scheduling</div>
-            <div class="timer-display" id="scheduling-display">00:00:00</div>
-            <div class="timer-buttons">
-                <button onclick="startTimer('scheduling')">Start</button>
-                <button onclick="pauseTimer('scheduling')">Pause</button>
-                <button onclick="resetTimer('scheduling')">Reset</button>
-            </div>
-        </div>
-        <div class="timer" id="meeting">
-            <div class="timer-title" contenteditable="true">Meeting</div>
-            <div class="timer-display" id="meeting-display">00:00:00</div>
-            <div class="timer-buttons">
-                <button onclick="startTimer('meeting')">Start</button>
-                <button onclick="pauseTimer('meeting')">Pause</button>
-                <button onclick="resetTimer('meeting')">Reset</button>
-            </div>
-        </div>
-        <div class="timer" id="reflecting">
-            <div class="timer-title" contenteditable="true">Reflecting</div>
-            <div class="timer-display" id="reflecting-display">00:00:00</div>
-            <div class="timer-buttons">
-                <button onclick="startTimer('reflecting')">Start</button>
-                <button onclick="pauseTimer('reflecting')">Pause</button>
-                <button onclick="resetTimer('reflecting')">Reset</button>
-            </div>
-        </div>
-        <div class="timer" id="other">
-            <div class="timer-title" contenteditable="true">Other</div>
-            <div class="timer-display" id="other-display">00:00:00</div>
-            <div class="timer-buttons">
-                <button onclick="startTimer('other')">Start</button>
-                <button onclick="pauseTimer('other')">Pause</button>
-                <button onclick="resetTimer('other')">Reset</button>
-            </div>
-        </div>
-        <div class="timer" id="other2">
-            <div class="timer-title" contenteditable="true">Other 2</div>
-            <div class="timer-display" id="other2-display">00:00:00</div>
-            <div class="timer-buttons">
-                <button onclick="startTimer('other2')">Start</button>
-                <button onclick="pauseTimer('other2')">Pause</button>
-                <button onclick="resetTimer('other2')">Reset</button>
-            </div>
-        </div>
-        <div class="timer" id="other3">
-            <div class="timer-title" contenteditable="true">Other 3</div>
-            <div class="timer-display" id="other3-display">00:00:00</div>
-            <div class="timer-buttons">
-                <button onclick="startTimer('other3')">Start</button>
-                <button onclick="pauseTimer('other3')">Pause</button>
-                <button onclick="resetTimer('other3')">Reset</button>
-            </div>
-        </div>
-        <div class="timer" id="other4">
-            <div class="timer-title" contenteditable="true">Other 4</div>
-            <div class="timer-display" id="other4-display">00:00:00</div>
-            <div class="timer-buttons">
-                <button onclick="startTimer('other4')">Start</button>
-                <button onclick="pauseTimer('other4')">Pause</button>
-                <button onclick="resetTimer('other4')">Reset</button>
-            </div>
-        </div>
-        <div class="timer" id="other5">
-            <div class="timer-title" contenteditable="true">Other 5</div>
-            <div class="timer-display" id="other5-display">00:00:00</div>
-            <div class="timer-buttons">
-                <button onclick="startTimer('other5')">Start</button>
-                <button onclick="pauseTimer('other5')">Pause</button>
-                <button onclick="resetTimer('other5')">Reset</button>
+                <button onclick="startTimer('timer-1')">Start</button>
+                <button onclick="pauseTimer('timer-1')">Pause</button>
+                <button onclick="resetTimer('timer-1')">Reset</button>
             </div>
         </div>
     </div>
@@ -200,40 +130,48 @@
     </table>
 
     <script>
-        const defaultTimers = {
-            emailing: { startTime: null, elapsed: 0 },
-            scheduling: { startTime: null, elapsed: 0 },
-            meeting: { startTime: null, elapsed: 0 },
-            reflecting: { startTime: null, elapsed: 0 },
-            other: { startTime: null, elapsed: 0 },
-            other2: { startTime: null, elapsed: 0 },
-            other3: { startTime: null, elapsed: 0 },
-            other4: { startTime: null, elapsed: 0 },
-            other5: { startTime: null, elapsed: 0 }
-        };
-
-        const timers = JSON.parse(localStorage.getItem('timers')) || defaultTimers;
-
-        // Ensure all timers are initialized correctly
-        Object.keys(defaultTimers).forEach(timerId => {
-            if (!timers[timerId]) {
-                timers[timerId] = { ...defaultTimers[timerId] };
-            } else {
-                if (timers[timerId].startTime === undefined) timers[timerId].startTime = null;
-                if (timers[timerId].elapsed === undefined) timers[timerId].elapsed = 0;
-            }
-        });
-
+        let timers = { 'timer-1': { startTime: null, elapsed: 0 } };
         const intervals = {};
 
         function saveTimers() {
             localStorage.setItem('timers', JSON.stringify(timers));
         }
 
+        function addTimer() {
+            if (Object.keys(timers).length >= 10) {
+                alert('Maximum number of timers reached.');
+                document.querySelector('.add-timer-button').disabled = true;
+                return;
+            }
+            const timerId = `timer-${Object.keys(timers).length + 1}`;
+            timers[timerId] = { startTime: null, elapsed: 0 };
+            saveTimers();
+
+            const timerContainer = document.getElementById('timer-container');
+
+            const timerDiv = document.createElement('div');
+            timerDiv.classList.add('timer');
+            timerDiv.id = timerId;
+
+            timerDiv.innerHTML = `
+                <div class="timer-title" contenteditable="true">New Timer</div>
+                <div class="timer-display" id="${timerId}-display">00:00:00</div>
+                <div class="timer-buttons">
+                    <button onclick="startTimer('${timerId}')">Start</button>
+                    <button onclick="pauseTimer('${timerId}')">Pause</button>
+                    <button onclick="resetTimer('${timerId}')">Reset</button>
+                </div>
+            `;
+
+            timerContainer.appendChild(timerDiv);
+            updateDisplay(timerId);
+            updateSummary();
+        }
+
         function startTimer(timerId) {
             pauseAllTimers(timerId);
             if (!timers[timerId].startTime) {
-                timers[timerId].startTime = Date.now() - timers[timerId].elapsed * 1000;
+                timers[timerId].startTime = Date.now() - (timers[timerId].elapsed * 1000 || 0);
                 saveTimers();
             }
 
@@ -245,6 +183,7 @@
                     updateSummary();
                 }, 1000);
             }
+            updateDisplay(timerId); // Ensure immediate update
         }
 
         function pauseTimer(timerId) {
@@ -294,13 +233,20 @@
         }
 
         function updateSummary() {
+            const addButton = document.querySelector('.add-timer-button');
+            if (Object.keys(timers).length >= 10) {
+                addButton.disabled = true;
+            } else {
+                addButton.disabled = false;
+            }
             const summaryBody = document.getElementById("summary-body");
             summaryBody.innerHTML = "";
             const totalSeconds = Object.values(timers).reduce((acc, timer) => acc + timer.elapsed, 0);
 
             Object.keys(timers).forEach(timerId => {
                 const timer = timers[timerId];
-                const label = document.getElementById(`${timerId}`).querySelector(".timer-title").textContent;
+                const labelElement = document.getElementById(timerId)?.querySelector(".timer-title");
+                const label = labelElement ? labelElement.textContent.trim() : "Unnamed Timer";
                 const time = `${String(Math.floor(timer.elapsed / 3600)).padStart(2, '0')}:${String(Math.floor((timer.elapsed % 3600) / 60)).padStart(2, '0')}:${String(timer.elapsed % 60).padStart(2, '0')}`;
                 const percentage = totalSeconds > 0 ? ((timer.elapsed / totalSeconds) * 100).toFixed(2) : "0.00";
 
@@ -314,16 +260,12 @@
             });
         }
 
-        // Initialize displays and recalculate elapsed times
-        Object.keys(timers).forEach(timerId => {
-            if (timers[timerId].startTime) {
-                const now = Date.now();
-                timers[timerId].elapsed = Math.floor((now - timers[timerId].startTime) / 1000);
-            }
-            updateDisplay(timerId);
-        });
-
-        updateSummary();
+        // Initialize with only one timer
+        window.onload = () => {
+            updateDisplay('timer-1');
+            saveTimers();
+            updateSummary();
+        };
     </script>
 </body>
 </html>
