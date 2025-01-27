@@ -81,6 +81,11 @@
         .summary-table td {
             color: #1565c0;
         }
+        .summary-table td[contenteditable] {
+            border: 1px dashed #ccc;
+            background-color: #e1f5fe;
+            border-radius: 4px;
+        }
         .reset-all-button, .add-timer-button {
             margin-bottom: 20px;
             padding: 10px 20px;
@@ -102,11 +107,12 @@
     <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px;">
         <button class="add-timer-button" onclick="addTimer()">Add Another Timer</button>
         <button class="reset-all-button" onclick="resetAllTimers()">Reset All</button>
+        <button class="reset-all-button" onclick="downloadTableAsCSV()">Download Table</button>
     </div>
     <div class="timer-container" id="timer-container">
         <!-- Start with one default timer -->
         <div class="timer" id="timer-1">
-            <div class="timer-title" contenteditable="true">Timer 1</div>
+            <div class="timer-title" contenteditable="true" oninput="updateTableName('timer-1')">Timer 1</div>
             <div class="timer-display" id="timer-1-display">00:00:00</div>
             <div class="timer-buttons">
                 <button onclick="startTimer('timer-1')">Start</button>
@@ -122,6 +128,7 @@
                 <th>Label</th>
                 <th>Total Time</th>
                 <th>Percentage</th>
+                <th>Notes</th>
             </tr>
         </thead>
         <tbody id="summary-body">
@@ -132,9 +139,11 @@
     <script>
         let timers = { 'timer-1': { startTime: null, elapsed: 0 } };
         const intervals = {};
+        const notes = {}; // Store notes for each timer
 
         function saveTimers() {
             localStorage.setItem('timers', JSON.stringify(timers));
+            localStorage.setItem('notes', JSON.stringify(notes));
         }
 
         function addTimer() {
@@ -145,6 +154,7 @@
             }
             const timerId = `timer-${Object.keys(timers).length + 1}`;
             timers[timerId] = { startTime: null, elapsed: 0 };
+            notes[timerId] = ''; // Initialize empty notes for new timer
             saveTimers();
 
             const timerContainer = document.getElementById('timer-container');
@@ -164,6 +174,13 @@
             `;
 
             timerContainer.appendChild(timerDiv);
+            const timerTitle = timerDiv.querySelector('.timer-title');
+            timerTitle.addEventListener('input', () => {
+                const row = document.querySelector(`#row-${timerId}`);
+                if (row) {
+                    row.querySelector('td:first-child').textContent = timerTitle.textContent.trim();
+                }
+            });
             updateDisplay(timerId);
             updateSummary();
         }
@@ -183,7 +200,6 @@
                     updateSummary();
                 }, 1000);
             }
-            updateDisplay(timerId); // Ensure immediate update
         }
 
         function pauseTimer(timerId) {
@@ -232,38 +248,59 @@
             display.textContent = `${hrs}:${mins}:${secs}`;
         }
 
-        function updateSummary() {
-            const addButton = document.querySelector('.add-timer-button');
-            if (Object.keys(timers).length >= 10) {
-                addButton.disabled = true;
-            } else {
-                addButton.disabled = false;
+        function updateTableName(timerId) {
+            const timerTitle = document.getElementById(timerId)?.querySelector('.timer-title').textContent.trim();
+            const row = document.querySelector(`#row-${timerId}`);
+            if (row) {
+                row.querySelector('td:first-child').textContent = timerTitle;
             }
+        }
+
+        function updateSummary() {
             const summaryBody = document.getElementById("summary-body");
-            summaryBody.innerHTML = "";
             const totalSeconds = Object.values(timers).reduce((acc, timer) => acc + timer.elapsed, 0);
 
             Object.keys(timers).forEach(timerId => {
-                const timer = timers[timerId];
-                const labelElement = document.getElementById(timerId)?.querySelector(".timer-title");
-                const label = labelElement ? labelElement.textContent.trim() : "Unnamed Timer";
-                const time = `${String(Math.floor(timer.elapsed / 3600)).padStart(2, '0')}:${String(Math.floor((timer.elapsed % 3600) / 60)).padStart(2, '0')}:${String(timer.elapsed % 60).padStart(2, '0')}`;
-                const percentage = totalSeconds > 0 ? ((timer.elapsed / totalSeconds) * 100).toFixed(2) : "0.00";
+                const label = document.getElementById(timerId)?.querySelector(".timer-title").textContent.trim() || "Unnamed Timer";
+                const time = `${String(Math.floor(timers[timerId].elapsed / 3600)).padStart(2, '0')}:${String(Math.floor((timers[timerId].elapsed % 3600) / 60)).padStart(2, '0')}:${String(timers[timerId].elapsed % 60).padStart(2, '0')}`;
+                const percentage = totalSeconds > 0 ? ((timers[timerId].elapsed / totalSeconds) * 100).toFixed(2) : "0.00";
 
-                const row = `<tr>
-                    <td>${label}</td>
-                    <td>${time}</td>
-                    <td>${percentage}%</td>
-                </tr>`;
-
-                summaryBody.innerHTML += row;
+                                let row = document.querySelector(`#row-${timerId}`);
+                if (!row) {
+                    row = document.createElement('tr');
+                    row.id = `row-${timerId}`;
+                    row.innerHTML = `
+                        <td>${label}</td>
+                        <td class="time-cell">${time}</td>
+                        <td class="percentage-cell">${percentage}%</td>
+                        <td contenteditable="true" oninput="notes['${timerId}'] = this.textContent; saveTimers();">${notes[timerId] || ''}</td>
+                    `;
+                    summaryBody.appendChild(row);
+                } else {
+                    row.querySelector('.time-cell').textContent = time;
+                    row.querySelector('.percentage-cell').textContent = `${percentage}%`;
+                }
             });
         }
 
-        // Initialize with only one timer
+        function downloadTableAsCSV() {
+            const rows = Array.from(document.querySelectorAll(".summary-table tr"));
+            const csvContent = rows.map(row => {
+                const cells = Array.from(row.querySelectorAll("th, td"));
+                return cells.map(cell => cell.textContent.trim()).join(",");
+            }).join("\n");
+
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "table_summary.csv";
+            link.style.display = "none";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         window.onload = () => {
-            updateDisplay('timer-1');
-            saveTimers();
             updateSummary();
         };
     </script>
